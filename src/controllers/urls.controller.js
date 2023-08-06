@@ -30,6 +30,7 @@ export async function openUrl(req, res) {
 }
 
 export async function deleteUrl(req, res) {
+    const { id } = req.params
     
     try {
 
