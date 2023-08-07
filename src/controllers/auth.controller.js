@@ -22,13 +22,13 @@ export async function signIn(req, res) {
     const { email, password } = req.body
 
     try {
-        const user = await db.query(`SELECT * FROM users WHERE email = $1`, [email])
+        const user = await db.query(`SELECT * FROM users WHERE email = $1;`, [email])
         const correctPassword = bcrypt.compareSync(password, user.rows[0].password)
 
         if (user.rowCount === 0 || !correctPassword) return res.sendStatus(401)
 
         const token = uuid()
-        await db.query(`INSERT INTO sessions ("userId", token) VALUES ($1, $2)`, [user.rows[0].id, token])
+        await db.query(`INSERT INTO sessions ("userId", token) VALUES ($1, $2);`, [user.rows[0].id, token])
         res.status(200).send({ token })
     } catch (err) {
         return res.status(500).send(err.message)

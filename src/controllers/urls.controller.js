@@ -3,9 +3,13 @@ import { db } from "../database/database.js"
 
 export async function shortenUrl(req, res) {
     const { url } = req.body
+    const { userId } = res.locals
+    const shortUrl = nanoid()
 
     try {
+        const urlsList = await db.query(`INSERT INTO urls (url, "shortUrl", "userId") VALUES ($1, $2, $3);`, [url, shortUrl, userId])
 
+        return res.status(201).send({ id: urlsList.rows[0].userId, shortUrl: urlsList.rows[0].shortUrl })
     } catch (err) {
         return res.status(500).send(err.message)
     }
