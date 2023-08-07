@@ -29,9 +29,13 @@ export async function getUrl(req, res) {
 }
 
 export async function openUrl(req, res) {
-    
-    try {
+    const { shorturl } = req.params
 
+    try {
+        const originalUrl = await db.query(`SELECT url FROM urls WHERE "shortUrl" = $1`, [shorturl])
+        if (originalUrl.rowCount === 0) return res.sendStatus(404)
+
+        res.redirect(originalUrl.rows[0].url)
     } catch (err) {
         return res.status(500).send(err.message)
     }
@@ -39,9 +43,16 @@ export async function openUrl(req, res) {
 
 export async function deleteUrl(req, res) {
     const { id } = req.params
-    
-    try {
+    const { userId } = res.locals
 
+    try {
+        const findUrlsById = await db.query(`SELECT * FROM urls WHERE id = $1;`, [id])
+        if (findUrlsById.rowCount === 0) return res.sendStatus(404)
+
+        if (findUrlsById.rows[0].userId !== userId) return res.sendStatus(401)
+
+        const deleteUrlById = await db.query(`DELETE FROM urls WHERE id = $1`, [id])
+        return res.sendStatus(204)
     } catch (err) {
         return res.status(500).send(err.message)
     }
