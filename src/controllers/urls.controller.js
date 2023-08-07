@@ -7,9 +7,9 @@ export async function shortenUrl(req, res) {
     const shortUrl = nanoid()
 
     try {
-        const urlsList = await db.query(`INSERT INTO urls (url, "shortUrl", "userId") VALUES ($1, $2, $3);`, [url, shortUrl, userId])
+        const urlsList = await db.query(`INSERT INTO urls (url, "shortUrl", "userId") VALUES ($1, $2, $3) RETURNING id;`, [url, shortUrl, userId])
 
-        return res.status(201).send({ id: userId, shortUrl: shortUrl })
+        return res.status(201).send({ id: urlsList.rows[0].id, shortUrl: shortUrl })
     } catch (err) {
         return res.status(500).send(err.message)
     }
@@ -29,13 +29,13 @@ export async function getUrl(req, res) {
 }
 
 export async function openUrl(req, res) {
-    const { shorturl } = req.params
+    const { shortUrl } = req.params
 
     try {
-        const originalUrl = await db.query(`SELECT id, url FROM urls WHERE "shortUrl" = $1;`, [shorturl])
+        const originalUrl = await db.query(`SELECT id, url FROM urls WHERE "shortUrl" = $1;`, [shortUrl])
         if (originalUrl.rowCount === 0) return res.sendStatus(404)
 
-        await db.query(`UPDATE urls SET "visitCount" = "visitCount" + 1 WHERE "shortUrl" = $1;`, [shorturl])
+        await db.query(`UPDATE urls SET "visitCount" = "visitCount" + 1 WHERE "shortUrl" = $1;`, [shortUrl])
         return res.redirect(originalUrl.rows[0].url)
     } catch (err) {
         return res.status(500).send(err.message)
