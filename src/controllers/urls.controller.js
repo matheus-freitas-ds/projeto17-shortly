@@ -9,14 +9,15 @@ export async function shortenUrl(req, res) {
     try {
         const urlsList = await db.query(`INSERT INTO urls (url, "shortUrl", "userId") VALUES ($1, $2, $3);`, [url, shortUrl, userId])
 
-        return res.status(201).send({ id: urlsList.rows[0].userId, shortUrl: urlsList.rows[0].shortUrl })
+        return res.status(201).send({ id: userId, shortUrl: shortUrl })
     } catch (err) {
         return res.status(500).send(err.message)
     }
 }
 
 export async function getUrl(req, res) {
-
+    const { id } = req.params
+    
     try {
 
     } catch (err) {
